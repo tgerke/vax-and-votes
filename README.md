@@ -1,4 +1,4 @@
-Vaccine uptake and vote shares in the 2020 presidential election
+Vaccine uptake and voting in the 2020 presidential election
 =====================
   
 Vaccine data from [CDC](https://covid.cdc.gov/covid-data-tracker/#vaccinations), and 2020 voting data from [Wikipedia](https://en.wikipedia.org/wiki/2020_United_States_presidential_election).
