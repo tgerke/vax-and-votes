@@ -128,9 +128,10 @@ vax_and_votes <- votes %>%
   ) %>% 
   filter(State != "District of Columbia")
 
-# plot --------------------------------------------------------------------
+# NYT style plot ----------------------------------------------------------
 
 library(ggtext)
+library(ggrepel)
 
 theme_set(
   firasans::theme_ipsum_fsc(
@@ -138,24 +139,63 @@ theme_set(
     axis_text_size = 10, 
     axis_title_size = 14,
     axis_title_just = "cc") +
-    theme(panel.grid.minor = element_blank(),
+    theme(panel.grid.minor = element_blank(), 
           plot.title = element_markdown(face = "plain"),
           plot.subtitle = element_markdown(),
           plot.caption = element_markdown(),
-          plot.title.position = "plot")
+          plot.title.position = "plot"
+    )
 )
 
-vax_and_votes %>%
-  ggplot(aes(x = pct_trump/100, y = pct_one_shot/100)) + 
-  geom_point() + 
-  geom_smooth(method = "lm", se = FALSE, formula = y ~ x, colour = "gray") + 
-  scale_x_continuous(labels = scales::label_percent(accuracy = 1)) + 
-  scale_y_continuous(labels = scales::label_percent(accuracy = 1)) + 
-  xlab("Trump vote percentage") + 
-  ylab(element_blank()) + 
+party_colors <- c(Blue = "#2E74C0", Red = "#CB454A", Swing = "gray")
+
+vax_and_votes %>% # first grab state abbreviations and assign party affiliation
+  left_join(tibble(State = state.name, state_abb = state.abb), by = "State") %>%
+  mutate(
+    party = case_when(
+      pct_trump > 52 ~ "Red",
+      pct_biden > 52 ~ "Blue",
+      TRUE ~ "Swing"
+    ), 
+    party_strength = case_when(
+      party == "Red" ~ pct_trump/100 + .35,
+      party == "Blue" ~ pct_biden/100 + .35,
+      party == "Swing" ~ .9
+    )
+  ) %>%
+  ggplot() + 
+  aes(x = pct_trump/100, y = pct_one_shot/100) + 
+  geom_segment(aes(x = .3, xend = .7, y = .7, yend = .7), size = .3, color = "#F0F0F0") + 
+  geom_segment(aes(x = .3, xend = .7, y = .3, yend = .3), size = .3, color = "#F0F0F0") + 
+  geom_segment(aes(x = .3, xend = .3, y = .3, yend = .7), size = .3, color = "#F0F0F0") + 
+  geom_segment(aes(x = .7, xend = .7, y = .3, yend = .7), size = .3, color = "#F0F0F0") + 
+  geom_segment(aes(x = .5, xend = .5, y = .3, yend = .7), size = .3, color = "#F0F0F0") + 
+  geom_segment(aes(x = .3, xend = .7, y = .5, yend = .5), size = .3, color = "#F0F0F0") + 
+  geom_point(aes(color = party, size = 2, alpha = party_strength), 
+             show.legend = FALSE, na.rm = TRUE) + 
+  geom_label_repel(aes(label = state_abb),
+                   size = 3,
+                   segment.colour = NA, 
+                   label.size = NA, 
+                   na.rm = TRUE,
+                   fill = alpha("white", 0)) + 
+  scale_color_manual(values = party_colors) + 
+  scale_x_continuous(labels = NULL, limits = c(.3, .70)) + 
+  scale_y_continuous(labels = scales::label_percent(accuracy = 1), limits = c(.3, .70)) + 
   labs(
-    title = "Percentage of state with at least one shot by Trump vote %",
+    x = glue::glue(
+    "&#x2190; More votes for ",
+    "<strong style = 'color:{party_colors['Blue']}'>Biden</strong>",
+    "<span style = 'color:white'>_____________________</span>",
+    "More votes for <strong style = 'color:{party_colors['Red']}'>Trump</strong> &#x2192;"),
+    y = element_blank(),
     caption = glue::glue(
       "Code: github.com/tgerke/vax_and_votes<br>",
       "Twitter: @travisgerke"
-    ))
+    )) + 
+  theme(
+    panel.grid.major = element_blank(), 
+    axis.title.x = element_markdown(margin = margin(-15, 0, 0, 0)),
+    axis.text.y = element_text(hjust = 5),
+    plot.margin = margin(0, .3, 0, 0, "cm")
+  )
