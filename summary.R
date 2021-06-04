@@ -149,7 +149,7 @@ theme_set(
 
 party_colors <- c(Blue = "#2E74C0", Red = "#CB454A", Swing = "gray")
 
-vax_and_votes %>% # first grab state abbreviations and assign party affiliation
+p <- vax_and_votes %>% # first grab state abbreviations and assign party affiliation
   left_join(tibble(State = state.name, state_abb = state.abb), by = "State") %>%
   mutate(
     party = case_when(
@@ -190,7 +190,7 @@ vax_and_votes %>% # first grab state abbreviations and assign party affiliation
     "More votes for <strong style = 'color:{party_colors['Red']}'>Trump</strong> &#x2192;"),
     y = element_blank(),
     caption = glue::glue(
-      "Code: github.com/tgerke/vax_and_votes<br>",
+      "Code: github.com/tgerke/vax-and-votes<br>",
       "Twitter: @travisgerke"
     )) + 
   theme(
@@ -199,3 +199,5 @@ vax_and_votes %>% # first grab state abbreviations and assign party affiliation
     axis.text.y = element_text(hjust = 5),
     plot.margin = margin(0, .3, 0, 0, "cm")
   )
+
+ggsave("plots/vax-and-votes.png", p, bg = "white", width = 8, height = 8)
