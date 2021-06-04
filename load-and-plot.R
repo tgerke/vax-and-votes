@@ -183,6 +183,8 @@ p <- vax_and_votes %>% # first grab state abbreviations and assign party affilia
   scale_x_continuous(labels = NULL, limits = c(.3, .70)) + 
   scale_y_continuous(labels = scales::label_percent(accuracy = 1), limits = c(.3, .70)) + 
   labs(
+    title = "&#37; residents given at least one COVID-19 vaccine shot by state...",
+    subtitle = "...is highly correlated with voting preference in the 2020 presidential election",
     x = glue::glue(
     "&#x2190; More votes for ",
     "<strong style = 'color:{party_colors['Blue']}'>Biden</strong>",
@@ -197,7 +199,7 @@ p <- vax_and_votes %>% # first grab state abbreviations and assign party affilia
     panel.grid.major = element_blank(), 
     axis.title.x = element_markdown(margin = margin(-15, 0, 0, 0)),
     axis.text.y = element_text(hjust = 5),
-    plot.margin = margin(0, .3, 0, 0, "cm")
+    plot.margin = margin(.3, .3, 0, .3, "cm")
   )
 
 ggsave("plots/vax-and-votes.png", p, bg = "white", width = 8, height = 8)
